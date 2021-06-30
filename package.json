@@ -1,0 +1,26 @@
+{
+  "name": "@ozymandiasthegreat/mfcc",
+  "version": "1.0.0",
+  "description": "A WASM implementation of MFCC using KissFFT and LibMFCC",
+  "main": "./lib/index.js",
+  "files": [
+    "./dist/*",
+    "./lib/*",
+    "./typings/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/OzymandiasTheGreat/mfcc-wasm.git"
+  },
+  "keywords": [
+    "mfcc",
+    "fft",
+    "wasm"
+  ],
+  "author": "Tomas Ravinskas <tomas.rav@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/OzymandiasTheGreat/mfcc-wasm/issues"
+  },
+  "homepage": "https://github.com/OzymandiasTheGreat/mfcc-wasm#readme"
+}
