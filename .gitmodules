@@ -1,0 +1,6 @@
+[submodule "libmfcc"]
+	path = libmfcc
+	url = https://github.com/jsawruk/libmfcc.git
+[submodule "kissfft"]
+	path = kissfft
+	url = https://github.com/mborgerding/kissfft.git
