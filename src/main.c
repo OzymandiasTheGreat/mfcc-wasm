@@ -1,19 +1,11 @@
 #include <stdlib.h>
+#include <complex.h>
+#include <math.h>
 #include <emscripten.h>
 
 #include "../kissfft/kiss_fft.h"
-#include "../libmfcc/libmfcc.h"
+#include "mfcc.h"
 
-#include "window.h"
-
-
-enum WINDOW_FUNCTION {
-	RECTANGULAR       = 0,
-	HANNING           = 1,
-	HAMMING           = 2,
-	BLACKMAN          = 3,
-	TUKEY             = 4,
-};
 
 
 unsigned int FRAME_SIZE;
@@ -24,28 +16,36 @@ kiss_fft_cpx* FFT_IN;
 kiss_fft_cpx* FFT_OUT;
 
 
-double* get_window() {
-	switch (WINDOW_TYPE) {
-		case RECTANGULAR:
-			return rectangular(FRAME_SIZE);
-		case HANNING:
-			return hanning(FRAME_SIZE);
-		case HAMMING:
-			return hamming(FRAME_SIZE);
-		case BLACKMAN:
-			return blackman(FRAME_SIZE);
-		case TUKEY:
-			return tukey(FRAME_SIZE, 0.5);
-		default:
-			return NULL;
+double* cosine_window(unsigned int n, const double* coef, unsigned int ncoef) {
+	double* w = malloc(n * sizeof(double));
+
+	if (n == 1) {
+		w[0] = 1.0;
+	} else {
+		const unsigned int wlength = n - 1;
+		for (unsigned int i = 0; i < n; i++) {
+			double wi = 0.0;
+
+			for (unsigned int j = 0; j < ncoef; j++) {
+				wi += coef[j] * cos(i * j * 2.0 * M_PI / wlength);
+			}
+
+			w[i] = wi;
+		}
 	}
+	return w;
 }
 
 
-EMSCRIPTEN_KEEPALIVE void init_mfcc(unsigned int frame_size, unsigned int sample_rate, unsigned int window_type) {
+double* hamming(unsigned int n) {
+	const double coef[2] = { 0.54, -0.46 };
+	return cosine_window(n, coef, sizeof(coef) / sizeof(double));
+}
+
+
+EMSCRIPTEN_KEEPALIVE void init_mfcc(unsigned int frame_size, unsigned int sample_rate) {
 	FRAME_SIZE = frame_size;
 	SAMPLE_RATE = sample_rate;
-	WINDOW_TYPE = window_type;
 
 	FFT_CFG = kiss_fft_alloc(FRAME_SIZE, 0, 0, 0);
 	FFT_IN  = malloc(FRAME_SIZE * sizeof(kiss_fft_cpx));
@@ -60,8 +60,8 @@ EMSCRIPTEN_KEEPALIVE void free_mfcc() {
 }
 
 
-EMSCRIPTEN_KEEPALIVE double* get_mfcc(double* frame, unsigned int filter_banks, unsigned int m) {
-	double* window = get_window();
+EMSCRIPTEN_KEEPALIVE double* get_mfcc(double* frame, unsigned int filterBanks, unsigned int m) {
+	double* window = hamming(FRAME_SIZE);
 	double* magnitudes = malloc(FRAME_SIZE * sizeof(double));
 	double* mfccs = malloc(m * sizeof(double));
 
@@ -75,9 +75,7 @@ EMSCRIPTEN_KEEPALIVE double* get_mfcc(double* frame, unsigned int filter_banks, 
 		magnitudes[i] = sqrt((FFT_OUT[i].r * FFT_OUT[i].r) + (FFT_OUT[i].i * FFT_OUT[i].i));
 	}
 
-	for (unsigned int i = 0; i < m; i++) {
-		mfccs[i] = GetCoefficient(magnitudes, SAMPLE_RATE, filter_banks, FRAME_SIZE, i);
-	}
+	mfcc(mfccs, magnitudes, SAMPLE_RATE, filterBanks, m, FRAME_SIZE, FRAME_SIZE);
 
 	free(window);
 	free(magnitudes);

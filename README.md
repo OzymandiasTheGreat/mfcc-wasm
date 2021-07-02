@@ -3,17 +3,16 @@
 A small and fast Mel Frequency Cepstral Coefficient calculator written in C.
 Intended to be compiled to WASM and used in JavaScript.
 
+Using KissFFT (BSD 3-clause) and libmfcc (MIT).
+
 The module exports default async function that takes configuration parameters:
 
 ``` javascript
 options = {
   frameSize:  480,
   sampleRate: 16000,
-  windowType: WINDOW_FUNCTION.HAMMING,
 };
 ```
-
-`WINDOW_FUNCTION` and `MFCC_DEFAULTS` are named exports of the module.
 
 The function resolves to `MFCC` instance which has 2 methods.
 

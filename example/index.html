@@ -11,8 +11,20 @@
 	import builder from "../lib/index.js";
 
 	builder({ frameSize: 16 }).then((mfcc) => {
-		const signal = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-		console.log(mfcc.getMFCC(signal));
+		console.time("MFCC");
+		for (let j = 0; j < 200; j++) {
+			const signal = [];
+			for (let i = 0; i < 480; i++) {
+				const val = Math.random();
+				if (i % 2 === 0) {
+					signal.push(-val);
+				} else {
+					signal.push(val);
+				}
+			}
+			mfcc.getMFCC(signal);
+		}
+		console.timeEnd("MFCC");
 	});
 </script>
 </body>
