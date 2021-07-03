@@ -1,6 +1,6 @@
 {
   "name": "@ozymandiasthegreat/mfcc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A WASM implementation of MFCC using KissFFT and libmfcc",
   "main": "./lib/index.js",
   "module": "./lib/embedded.js",
